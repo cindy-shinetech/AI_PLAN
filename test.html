@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>PDF路径解析显示</title>
+<style>
+  body, html { margin: 0; padding: 0; height: 100%; font-family: monospace; }
+  #fileInput { margin: 10px; }
+  #output { white-space: pre-wrap; padding: 10px; background: #f7f7f7; height: 80vh; overflow-y: auto; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<input type="file" id="fileInput" accept="application/pdf" />
+<div id="output">请上传 PDF 文件，结果将在这里显示...</div>
+
+<script src="https://www.pdftron.com/webviewer/lib/webviewer.min.js"></script>
+<script>
+  WebViewer({
+    path: 'https://www.pdftron.com/webviewer/lib',
+    fullAPI: true
+  }, document.createElement('div')).then(instance => {
+    const { documentViewer } = instance;
+    const output = document.getElementById('output');
+    const fileInput = document.getElementById('fileInput');
+
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file || file.type !== 'application/pdf') {
+        output.textContent = '请选择一个 PDF 文件！';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function() {
+        const typedArray = new Uint8Array(this.result);
+        instance.loadDocument(typedArray, { filename: file.name });
+      };
+      reader.readAsArrayBuffer(file);
+
+      // 清空之前内容
+      output.textContent = '';
+    });
+
+    documentViewer.addEventListener('documentLoaded', async () => {
+      const doc = documentViewer.getDocument();
+      const pageCount = doc.getPageCount();
+      let allText = `PDF 加载完成，共 ${pageCount} 页\n\n`;
+
+      for (let i = 1; i <= pageCount; i++) {
+        const page = await doc.loadPage(i);
+        const content = await page.getContent();
+        allText += `--- 第 ${i} 页 ---\n`;
+        let pathCount = 0;
+
+        for (const el of content) {
+          if (el.name === 'path') {
+            pathCount++;
+            const cmds = el.path.getPathCommands();
+            allText += `路径 ${pathCount} (命令数: ${cmds.length}):\n`;
+            cmds.forEach((cmd, idx) => {
+              allText += `  [${idx}] ${cmd.cmd} ${cmd.pts.map(p => p.toFixed(2)).join(', ')}\n`;
+            });
+            allText += '\n';
+          }
+        }
+
+        if (pathCount === 0) allText += '本页无路径\n\n';
+      }
+
+      output.textContent = allText;
+    });
+  });
+</script>
+
+</body>
+</html>
