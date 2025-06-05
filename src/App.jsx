@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { CssBaseline, Container } from '@mui/material'
 import UploadPage from './pages/UploadPage'
 import RecognitionResults from './pages/RecognitionResults'

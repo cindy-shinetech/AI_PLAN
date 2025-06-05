@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { FiUploadCloud } from 'react-icons/fi' 
 import { PageContainer } from "../components/Layout/PageContainer";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 // ... import 保持不变
 
