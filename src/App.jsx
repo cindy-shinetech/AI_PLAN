@@ -7,12 +7,12 @@ function App() {
   return (
     <Router>
       <CssBaseline />
-      <Container maxWidth="lg">
+      {/* <Container maxWidth="lg"> */}
         <Routes> 
           <Route path="/" element={<UploadPage />} />
           <Route path="/results" element={<RecognitionResults />} /> 
         </Routes>
-      </Container>
+      {/* </Container> */}
     </Router>
   )
 }
