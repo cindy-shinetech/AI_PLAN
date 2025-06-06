@@ -12,6 +12,7 @@ const PlanCanvas = ({
   elements,
   selectedIndex,
   style,
+  isAiResult,
 }) => {
   const canvasRef = useRef(null);
   const divRef = useRef(null);
@@ -70,27 +71,39 @@ const PlanCanvas = ({
           const selectedElement = elements[selectedIndex];
             if (selectedElement) {
               console.log("Drawing selected element:", selectedElement);
-              if(selectedElement.type === "l"){
-                ctx.beginPath();
-                ctx.moveTo(selectedElement.x1 * factor, selectedElement.y1 * factor);
-                ctx.lineTo(selectedElement.x2 * factor, selectedElement.y2 * factor);
-                ctx.strokeStyle = "red";
-                ctx.lineWidth = 2 * factor;
-                ctx.stroke(); 
-              }
-              if(selectedElement.type==='c'){
-                ctx.beginPath();
-                ctx.strokeStyle = "red";
-                ctx.lineWidth = 2 * factor;
-                ctx.moveTo(selectedElement.x0 * factor, selectedElement.y0 * factor);
-                ctx.bezierCurveTo(
-                  selectedElement.x1 * factor,
-                  selectedElement.y1 * factor,
-                  selectedElement.x2 * factor,
-                  selectedElement.y2 * factor,
-                  selectedElement.x3 * factor,
-                  selectedElement.y3 * factor);
-                ctx.stroke(); 
+              if (isAiResult) {
+                const cx = (selectedElement.cx - selectedElement.width / 2) * factor;
+                const cy = (selectedElement.cy - selectedElement.height / 2) * factor;
+                const w = selectedElement.width * factor;
+                const h = selectedElement.height * factor;
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // R,G,B,Alpha
+                ctx.fillRect(cx, cy, w, h); // x, y, width, height
+                ctx.strokeStyle = 'rgb(255, 0, 0)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(cx, cy, w, h);
+              } else {
+                if(selectedElement.type === "l"){
+                  ctx.beginPath();
+                  ctx.moveTo(selectedElement.x1 * factor, selectedElement.y1 * factor);
+                  ctx.lineTo(selectedElement.x2 * factor, selectedElement.y2 * factor);
+                  ctx.strokeStyle = "red";
+                  ctx.lineWidth = 2 * factor;
+                  ctx.stroke(); 
+                }
+                if(selectedElement.type==='c'){
+                  ctx.beginPath();
+                  ctx.strokeStyle = "red";
+                  ctx.lineWidth = 2 * factor;
+                  ctx.moveTo(selectedElement.x0 * factor, selectedElement.y0 * factor);
+                  ctx.bezierCurveTo(
+                    selectedElement.x1 * factor,
+                    selectedElement.y1 * factor,
+                    selectedElement.x2 * factor,
+                    selectedElement.y2 * factor,
+                    selectedElement.x3 * factor,
+                    selectedElement.y3 * factor);
+                  ctx.stroke(); 
+                }
               }
             } 
 
@@ -99,7 +112,7 @@ const PlanCanvas = ({
 			}
     };
     img.src = imageSource;
-  }, [imageSource, canvasWidth, canvasHeight, selectedIndex, elements, dpi, pxWidth]);
+  }, [imageSource, canvasWidth, canvasHeight, selectedIndex, elements, dpi, pxWidth, isAiResult]);
 
   return (
     <div ref={divRef} style={{ ...style }}>

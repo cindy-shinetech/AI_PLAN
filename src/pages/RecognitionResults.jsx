@@ -27,17 +27,27 @@ export default function RecognitionResults() {
       console.error("error resultJson")
       return
     }
-
-    const enriched = resultJson.lines.map((line, index) => ({
+    const lineSet = resultJson.lines.filter(l => l.length > 20
+      && 0 < l.start[0] && l.start[0] < resultJson.ptWidth
+      && 0 < l.start[1] && l.start[1] < resultJson.ptHeight
+      && 0 < l.end[0] && l.end[0] < resultJson.ptWidth
+      && 0 < l.end[1] && l.end[1] < resultJson.ptHeight)
+      .sort((l1, l2) => {
+        if (l1.start[0] === l2.start[0]) {
+          return l1.start[1] - l2.start[1]
+        } else {
+          return l1.start[0] - l2.start[0]
+        }
+      })
+    const enriched = lineSet.map((line, index) => ({
       id: index + 1,
-      name: `Line ${index + 1}`,
+      name: `${location.state?.recognitionType === 'ai' ? line.class : 'Line'} ${index + 1}`,
       properties: [
         { name: 'Start', value: `(${line.start[0]}, ${line.start[1]})` },
         { name: 'End', value: `(${line.end[0]}, ${line.end[1]})` },
         { name: 'Length', value: `${line.length}${recognitionType ? 'px' : 'pt'}` }
       ]
     }))
-
     setDataItems(enriched)
     setSelectedItem(enriched[0])
     setCurrentPage(1)
@@ -55,7 +65,9 @@ export default function RecognitionResults() {
               {paginatedItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => {
+                    setSelectedItem(item)
+                  }}
                   className={`w-full text-left p-2 rounded-md transition-colors ${
                     selectedItem?.id === item.id
                       ? 'bg-blue-100 text-blue-700 font-medium'
@@ -125,9 +137,20 @@ export default function RecognitionResults() {
                 pxHeight={resultJson.pxHeight}
                 dpi={resultJson.dpi}
                 imageSource={resultJson.image}
-                elements={resultJson.convertedElements}
+                elements={resultJson.convertedElements.filter(l => l.length > 20
+                  && 0 < l.x1 && l.x1 < resultJson.ptWidth
+                  && 0 < l.y1 && l.y1 < resultJson.ptHeight
+                  && 0 < l.x2 && l.x2 < resultJson.ptWidth
+                  && 0 < l.y2 && l.y2 < resultJson.ptHeight).sort((l1, l2) => {
+                    if (l1.x1 === l2.x1) {
+                      return l1.y1 - l2.y1
+                    } else {
+                      return l1.x1 - l2.x1
+                    }
+                  }) }
                 selectedIndex={selectedItem?.id - 1}
                 style={{ width: '100%', height: '100%' }}
+                isAiResult={location.state?.recognitionType === 'ai'}
               />
             </div>
           ) : (
