@@ -50,7 +50,7 @@ export default function UploadPage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('mode', recognitionType) // 🟡 添加识别类型参数
+      formData.append('mode', recognitionType)  
 
       const res = await fetch('http://localhost:8000/upload/', {
         method: 'POST',
@@ -63,7 +63,7 @@ export default function UploadPage() {
           uploadedFileUrl: URL.createObjectURL(file),
           fileType: file.type,
           resultJson: result,
-          recognitionType: recognitionType, // 🟡 可选：用于结果页识别模式展示
+          recognitionType: recognitionType,  
         }
       })
     } catch (err) {

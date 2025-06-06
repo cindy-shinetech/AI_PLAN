@@ -27,7 +27,19 @@ export default function RecognitionResults() {
       console.error("error resultJson")
       return
     }
-    const lineSet = resultJson.lines.filter(l => l.length > 20
+    let lineSet;
+    if(recognitionType){ 
+      lineSet = resultJson.lines
+      .sort((l1, l2) => {
+        if (l1.start[0] === l2.start[0]) {
+          return l1.start[1] - l2.start[1]
+        } else {
+          return l1.start[0] - l2.start[0]
+        }
+      }) 
+  }
+    else{
+      lineSet = resultJson.lines.filter(l => l.length > 20
       && 0 < l.start[0] && l.start[0] < resultJson.ptWidth
       && 0 < l.start[1] && l.start[1] < resultJson.ptHeight
       && 0 < l.end[0] && l.end[0] < resultJson.ptWidth
@@ -39,6 +51,7 @@ export default function RecognitionResults() {
           return l1.start[0] - l2.start[0]
         }
       })
+    }
     const enriched = lineSet.map((line, index) => ({
       id: index + 1,
       name: `${location.state?.recognitionType === 'ai' ? line.class : 'Line'} ${index + 1}`,
@@ -137,17 +150,30 @@ export default function RecognitionResults() {
                 pxHeight={resultJson.pxHeight}
                 dpi={resultJson.dpi}
                 imageSource={resultJson.image}
-                elements={resultJson.convertedElements.filter(l => l.length > 20
-                  && 0 < l.x1 && l.x1 < resultJson.ptWidth
-                  && 0 < l.y1 && l.y1 < resultJson.ptHeight
-                  && 0 < l.x2 && l.x2 < resultJson.ptWidth
-                  && 0 < l.y2 && l.y2 < resultJson.ptHeight).sort((l1, l2) => {
+                elements={
+                (location.state?.recognitionType === 'ai'
+                    ? resultJson.convertedElements.sort((l1, l2) => {
                     if (l1.x1 === l2.x1) {
-                      return l1.y1 - l2.y1
+                      return l1.y1 - l2.y1;
                     } else {
-                      return l1.x1 - l2.x1
+                      return l1.x1 - l2.x1;
                     }
-                  }) }
+                  })   
+                    : resultJson.convertedElements.filter(l =>
+                        l.length > 20 &&
+                        0 < l.x1 && l.x1 < resultJson.ptWidth &&
+                        0 < l.y1 && l.y1 < resultJson.ptHeight &&
+                        0 < l.x2 && l.x2 < resultJson.ptWidth &&
+                        0 < l.y2 && l.y2 < resultJson.ptHeight
+                      )
+                  ).sort((l1, l2) => {
+                    if (l1.x1 === l2.x1) {
+                      return l1.y1 - l2.y1;
+                    } else {
+                      return l1.x1 - l2.x1;
+                    }
+                  })
+                }
                 selectedIndex={selectedItem?.id - 1}
                 style={{ width: '100%', height: '100%' }}
                 isAiResult={location.state?.recognitionType === 'ai'}
