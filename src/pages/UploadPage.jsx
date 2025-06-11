@@ -52,7 +52,7 @@ export default function UploadPage() {
       formData.append('file', file)
       formData.append('mode', recognitionType)  
 
-      const res = await fetch('http://localhost:8000/upload/', {
+      const res = await fetch(`${import.meta.env.VITE_BASE_API_URL}upload/`, {
         method: 'POST',
         body: formData,
       })
